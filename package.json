@@ -1,0 +1,24 @@
+{
+  "name": "circomx-template",
+  "type": "module",
+  "packageManager": "yarn@3.3.1",
+  "devDependencies": {
+    "@types/node": "^20.7.2",
+    "ts-node": "^10.9.1"
+  },
+  "dependencies": {
+    "@chainsafe/persistent-merkle-tree": "^0.6.1",
+    "@chainsafe/ssz": "^0.13.0",
+    "@lodestar/types": "^1.11.3",
+    "@succinctlabs/circomx": "^0.0.13",
+    "@vercel/ncc": "^0.38.0",
+    "axios": "^1.5.1",
+    "tsx": "^3.13.0",
+    "typescript": "^5.2.2"
+  },
+  "pkg": {
+    "options": [
+      "experimental-modules"
+    ]
+  }
+}

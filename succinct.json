@@ -1,0 +1,18 @@
+{
+    "entrypoints": [
+        {
+            "name": "step",
+            "preset": "circomx",
+            "baseDir": ".",
+            "buildCommand": "yarn install && yarn ncc build src/step.ts -o build && node build/index.js build",
+            "proveCommand": "node build/index.js prove"
+        },
+        {
+            "name": "rotate",
+            "preset": "circomx",
+            "baseDir": ".",
+            "buildCommand": "yarn install && yarn ncc build src/rotate.ts -o build && node build/index.js build",
+            "proveCommand": "node build/index.js prove"
+        }
+    ]
+}
