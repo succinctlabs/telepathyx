@@ -31,7 +31,8 @@ contract DeployLightClient is Script {
         {
             string[] memory curlInputs = new string[](4);
             curlInputs[0] = "curl";
-            curlInputs[1] = string(abi.encodePacked(CONSENSUS_RPC_1, "/api/beacon/proof/lightclient/init/head"));
+            curlInputs[1] =
+                string(abi.encodePacked(CONSENSUS_RPC_1, "/api/beacon/proof/lightclient/init/head"));
             curlInputs[2] = "-o";
             curlInputs[3] = "init.json";
 

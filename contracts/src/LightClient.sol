@@ -73,14 +73,24 @@ contract LightClient {
     }
 
     function requestStep(uint256 attestedSlot) external payable {
-        IFunctionGateway(FUNCTION_GATEWAY_ADDRESS).requestCall{ value: msg.value }(
-            STEP_FUNCTION_ID, abi.encodePacked(syncCommitteePoseidons[getSyncCommitteePeriod(attestedSlot)], uint64(attestedSlot)), address(this), abi.encodeWithSelector(this.step.selector, attestedSlot), 1000000
+        IFunctionGateway(FUNCTION_GATEWAY_ADDRESS).requestCall{value: msg.value}(
+            STEP_FUNCTION_ID,
+            abi.encodePacked(
+                syncCommitteePoseidons[getSyncCommitteePeriod(attestedSlot)], uint64(attestedSlot)
+            ),
+            address(this),
+            abi.encodeWithSelector(this.step.selector, attestedSlot),
+            1000000
         );
     }
 
     function requestRotate(uint256 finalizedSlot) external payable {
-        IFunctionGateway(FUNCTION_GATEWAY_ADDRESS).requestCall{ value: msg.value }(
-            ROTATE_FUNCTION_ID, abi.encodePacked(headers[finalizedSlot]), address(this), abi.encodeWithSelector(this.rotate.selector, finalizedSlot), 1000000
+        IFunctionGateway(FUNCTION_GATEWAY_ADDRESS).requestCall{value: msg.value}(
+            ROTATE_FUNCTION_ID,
+            abi.encodePacked(headers[finalizedSlot]),
+            address(this),
+            abi.encodeWithSelector(this.rotate.selector, finalizedSlot),
+            1000000
         );
     }
 
@@ -140,7 +150,9 @@ contract LightClient {
     /// @dev Checks if roots exists for the slot already. If there is, check for a conflict between
     ///      the given roots and the existing roots. If there is an existing header but no
     ///      conflict, do nothing. This avoids timestamp renewal DoS attacks.
-    function setSlotRoots(uint256 slot, bytes32 finalizedHeaderRoot, bytes32 executionStateRoot) internal {
+    function setSlotRoots(uint256 slot, bytes32 finalizedHeaderRoot, bytes32 executionStateRoot)
+        internal
+    {
         if (headers[slot] != bytes32(0)) {
             if (headers[slot] != finalizedHeaderRoot) {
                 consistent = false;
@@ -164,7 +176,10 @@ contract LightClient {
 
     /// @notice Sets the sync committee poseidon for a given period.
     function setSyncCommitteePoseidon(uint256 period, bytes32 poseidon) internal {
-        if (syncCommitteePoseidons[period] != bytes32(0) && syncCommitteePoseidons[period] != poseidon) {
+        if (
+            syncCommitteePoseidons[period] != bytes32(0)
+                && syncCommitteePoseidons[period] != poseidon
+        ) {
             consistent = false;
             return;
         }
