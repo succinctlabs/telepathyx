@@ -41,7 +41,7 @@ contract LightClient {
 
     error SyncCommitteeNotSet(uint256 period);
     error HeaderRootNotSet(uint256 slot);
-    error SlotAlreadyFinalized(uint64 slot);
+    error SlotBehindHead(uint64 slot);
     error NotEnoughParticipation(uint16 participation);
     error SyncCommitteeAlreadySet(uint256 period);
     error HeaderRootAlreadySet(uint256 slot);
@@ -120,7 +120,7 @@ contract LightClient {
         }
 
         if (finalizedSlot <= head) {
-            revert SlotAlreadyFinalized(finalizedSlot);
+            revert SlotBehindHead(finalizedSlot);
         }
 
         setSlotRoots(uint256(finalizedSlot), finalizedHeaderRoot, executionStateRoot);
