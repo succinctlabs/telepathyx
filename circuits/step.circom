@@ -118,7 +118,7 @@ template Step() {
         if (i < 8) {
             inputHasher.in[32+i] <== attestedSlot[7-i];
         } else {
-            inputHasher.in[32+i] === 0;
+            attestedSlot[i] === 0;
         }
     }
 
