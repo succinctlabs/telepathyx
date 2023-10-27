@@ -21,9 +21,6 @@ contract LightClient {
     uint256 internal constant NEXT_SYNC_COMMITTEE_INDEX = 55;
     uint256 internal constant EXECUTION_STATE_ROOT_INDEX = 402;
 
-    /// @notice Whether the light client has had conflicting variables for the same slot.
-    bool public consistent = true;
-
     /// @notice The latest slot the light client has a finalized header for.
     uint256 public head = 0;
 
@@ -39,12 +36,16 @@ contract LightClient {
     /// @notice Maps from a period to the poseidon commitment for the sync committee.
     mapping(uint256 => bytes32) public syncCommitteePoseidons;
 
-    event HeaderUpdate(uint256 indexed slot, bytes32 indexed root);
+    event HeadUpdate(uint256 indexed slot, bytes32 indexed root);
     event SyncCommitteeUpdate(uint256 indexed period, bytes32 indexed root);
 
     error SyncCommitteeNotSet(uint256 period);
-    error NotEnoughParticipation(uint16 participation);
     error HeaderRootNotSet(uint256 slot);
+    error SlotBehindHead(uint64 slot);
+    error NotEnoughParticipation(uint16 participation);
+    error SyncCommitteeAlreadySet(uint256 period);
+    error HeaderRootAlreadySet(uint256 slot);
+    error StateRootAlreadySet(uint256 slot);
 
     constructor(
         bytes32 genesisValidatorsRoot,
@@ -72,6 +73,7 @@ contract LightClient {
         setSyncCommitteePoseidon(syncCommitteePeriod, syncCommitteePoseidon);
     }
 
+    /// @notice Through the FunctionGateway, request for a step proof to be generated with the given attested slot number as the input.
     function requestStep(uint256 attestedSlot) external payable {
         IFunctionGateway(FUNCTION_GATEWAY_ADDRESS).requestCall{value: msg.value}(
             STEP_FUNCTION_ID,
@@ -84,6 +86,7 @@ contract LightClient {
         );
     }
 
+    /// @notice Through the FunctionGateway, request for a rotate proof to be generated with the given finalized slot number as the input.
     function requestRotate(uint256 finalizedSlot) external payable {
         IFunctionGateway(FUNCTION_GATEWAY_ADDRESS).requestCall{value: msg.value}(
             ROTATE_FUNCTION_ID,
@@ -94,6 +97,7 @@ contract LightClient {
         );
     }
 
+    /// @notice Process a step proof that has been verified in the FunctionGateway, then move the head forward and store the new roots.
     function step(uint256 attestedSlot) external {
         uint256 period = getSyncCommitteePeriod(attestedSlot);
         bytes32 syncCommitteePoseidon = syncCommitteePoseidons[period];
@@ -115,9 +119,14 @@ contract LightClient {
             revert NotEnoughParticipation(participation);
         }
 
+        if (finalizedSlot <= head) {
+            revert SlotBehindHead(finalizedSlot);
+        }
+
         setSlotRoots(uint256(finalizedSlot), finalizedHeaderRoot, executionStateRoot);
     }
 
+    /// @notice Process a rotate proof that has been verified in the FunctionGateway, then store the next sync committee poseidon.
     function rotate(uint256 finalizedSlot) external {
         bytes32 finalizedHeaderRoot = headers[finalizedSlot];
         if (finalizedHeaderRoot == bytes32(0)) {
@@ -154,34 +163,22 @@ contract LightClient {
         internal
     {
         if (headers[slot] != bytes32(0)) {
-            if (headers[slot] != finalizedHeaderRoot) {
-                consistent = false;
-            }
-            return;
+            revert HeaderRootAlreadySet(slot);
         }
         if (executionStateRoots[slot] != bytes32(0)) {
-            if (executionStateRoots[slot] != executionStateRoot) {
-                consistent = false;
-            }
-            return;
+            revert StateRootAlreadySet(slot);
         }
-        if (slot > head) {
-            head = slot;
-        }
+        head = slot;
         headers[slot] = finalizedHeaderRoot;
         executionStateRoots[slot] = executionStateRoot;
         timestamps[slot] = block.timestamp;
-        emit HeaderUpdate(slot, finalizedHeaderRoot);
+        emit HeadUpdate(slot, finalizedHeaderRoot);
     }
 
     /// @notice Sets the sync committee poseidon for a given period.
     function setSyncCommitteePoseidon(uint256 period, bytes32 poseidon) internal {
-        if (
-            syncCommitteePoseidons[period] != bytes32(0)
-                && syncCommitteePoseidons[period] != poseidon
-        ) {
-            consistent = false;
-            return;
+        if (syncCommitteePoseidons[period] != bytes32(0)) {
+            revert SyncCommitteeAlreadySet(period);
         }
         syncCommitteePoseidons[period] = poseidon;
         emit SyncCommitteeUpdate(period, poseidon);
