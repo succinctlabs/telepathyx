@@ -115,7 +115,7 @@ template Step() {
 
     // inputHasher[32:40] == requestedAttestedSlot bytes (LE to BE)
     for (var i = 0; i < 32; i++) {
-        if i < 8 {
+        if (i < 8) {
             inputHasher.in[32+i] <== attestedSlot[7-i];
         } else {
             inputHasher.in[32+i] === 0;
