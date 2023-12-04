@@ -761,9 +761,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@succinctlabs/circomx@npm:^0.0.13":
-  version: 0.0.13
-  resolution: "@succinctlabs/circomx@npm:0.0.13"
+"@succinctlabs/circomx@npm:^0.0.18":
+  version: 0.0.18
+  resolution: "@succinctlabs/circomx@npm:0.0.18"
   dependencies:
     "@chainsafe/persistent-merkle-tree": ^0.6.1
     "@chainsafe/ssz": ^0.13.0
@@ -783,7 +783,7 @@ __metadata:
     tsx: ^3.13.0
     typescript: ^5.2.2
     yargs: ^17.7.2
-  checksum: 111ad0495241542b6e7e11797527a46a60c13b1ebcb863a8d9cff4ef226fb360dae20a15040f6f41aaf8ddc08738ce93235c9e9c1715e789e5805c96af55e62e
+  checksum: eddcf220e07e5c3ace62b3773f0da2a9936fd98a33f54f3800279728729776d3e5f40e9a0e7846de2c8e25f1b9c3f61daa6133fa14054657a234f975515bfb5c
   languageName: node
   linkType: hard
 
@@ -1161,7 +1161,7 @@ __metadata:
     "@chainsafe/persistent-merkle-tree": ^0.6.1
     "@chainsafe/ssz": ^0.13.0
     "@lodestar/types": ^1.11.3
-    "@succinctlabs/circomx": ^0.0.13
+    "@succinctlabs/circomx": ^0.0.18
     "@types/node": ^20.7.2
     "@vercel/ncc": ^0.38.0
     axios: ^1.5.1

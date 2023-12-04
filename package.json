@@ -10,7 +10,7 @@
     "@chainsafe/persistent-merkle-tree": "^0.6.1",
     "@chainsafe/ssz": "^0.13.0",
     "@lodestar/types": "^1.11.3",
-    "@succinctlabs/circomx": "^0.0.13",
+    "@succinctlabs/circomx": "^0.0.18",
     "@vercel/ncc": "^0.38.0",
     "axios": "^1.5.1",
     "tsx": "^3.13.0",
