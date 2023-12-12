@@ -29,12 +29,13 @@ contract DeployLightClient is Script {
 
         LightClientInit memory initData;
         {
-            string[] memory curlInputs = new string[](4);
+            string[] memory curlInputs = new string[](5);
             curlInputs[0] = "curl";
             curlInputs[1] =
                 string(abi.encodePacked(CONSENSUS_RPC_1, "/api/beacon/proof/lightclient/init/head"));
             curlInputs[2] = "-o";
             curlInputs[3] = "init.json";
+            curlInputs[4] = "--silent";
 
             vm.ffi(curlInputs);
 
