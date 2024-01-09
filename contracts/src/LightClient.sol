@@ -183,4 +183,9 @@ contract LightClient {
         syncCommitteePoseidons[period] = poseidon;
         emit SyncCommitteeUpdate(period, poseidon);
     }
+
+    /// @notice Deprecated function, here for compatibility with the old light client.
+    function consistent() external pure returns (bool) {
+        return true;
+    }
 }
