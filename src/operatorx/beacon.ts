@@ -237,6 +237,8 @@ type BeaconId = number | Uint8Array | string | bigint;
 export enum ChainId {
   Mainnet = 1,
   Goerli = 5,
+  Sepolia = 11155111,
+  Holesky = 17000,
   Gnosis = 100,
 }
 
@@ -255,6 +257,20 @@ config[ChainId.Mainnet] = {
   slotsPerEpoch: 32,
   epochsPerPeriod: 256,
   capellaForkEpoch: 194048,
+};
+
+config[ChainId.Sepolia] = {
+  secondsPerSlot: 12,
+  slotsPerEpoch: 32,
+  epochsPerPeriod: 256,
+  capellaForkEpoch: 56832,
+};
+
+config[ChainId.Holesky] = {
+  secondsPerSlot: 12,
+  slotsPerEpoch: 32,
+  epochsPerPeriod: 256,
+  capellaForkEpoch: 256,
 };
 
 config[ChainId.Goerli] = {
