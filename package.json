@@ -4,7 +4,12 @@
   "packageManager": "yarn@3.3.1",
   "devDependencies": {
     "@types/node": "^20.7.2",
-    "ts-node": "^10.9.1"
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1",
+    "node-fetch": "^3.3.2",
+    "ts-node": "^10.9.1",
+    "tsx": "^4.6.2",
+    "yargs": "^17.7.2"
   },
   "dependencies": {
     "@chainsafe/persistent-merkle-tree": "^0.6.1",
@@ -14,11 +19,17 @@
     "@vercel/ncc": "^0.38.0",
     "axios": "^1.5.1",
     "tsx": "^3.13.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "viem": "^2.0.6"
   },
   "pkg": {
     "options": [
       "experimental-modules"
     ]
+  },
+  "scripts": {
+    "build": "yarn clean && tsc -b",
+    "start": "node --es-module-specifier-resolution=node dist/src/operatorx/cli.js",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo"
   }
 }
