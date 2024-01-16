@@ -1,4 +1,4 @@
-import { BeaconClient } from "./beacon.js";
+import { BeaconClient, computeBitSum } from "./beacon.js";
 import axios from "axios";
 import {
   PublicClient,
@@ -349,8 +349,8 @@ export class Operator {
     }
 
     let requestSlot = undefined;
-    // Try slots from head to head - 100
-    for (let i = 0; i <= 100; i++) {
+    // Try slots from head - 1 to head - 100
+    for (let i = 1; i <= 100; i++) {
       try {
         // Try to get the step update for the current head - i
         const data = await this.client.beacon.getStepUpdate(
@@ -358,9 +358,8 @@ export class Operator {
         );
         if (
           // If the step update is valid, then we break
-          true
-          // Number(BeaconSDK.computeBitSum(data.syncAggregate.syncCommitteeBits)) >
-          // this.config.finalityThreshold
+          Number(computeBitSum(data.syncAggregate.syncCommitteeBits)) >
+          this.config.finalityThreshold
         ) {
           requestSlot = headSlot - BigInt(i);
           console.log("Found a valid slot to request step for:", requestSlot);
@@ -379,7 +378,7 @@ export class Operator {
     }
 
     if (requestSlot === undefined) {
-      await console.log(
+      console.log(
         `No valid step update found for TelepathyX at ${this.config.address}`
       );
     } else {

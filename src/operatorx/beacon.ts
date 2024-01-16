@@ -1,4 +1,4 @@
-import { toHexString } from "@chainsafe/ssz";
+import { BitArray, toHexString } from "@chainsafe/ssz";
 import {
   ProofType,
   SingleProof,
@@ -307,4 +307,13 @@ export class BeaconChainConfig {
   static capellaForkSlot(chainId: ChainId): number {
     return config[chainId].capellaForkEpoch * config[chainId].slotsPerEpoch;
   }
+}
+
+export function computeBitSum(bits: BitArray): bigint {
+  return BigInt(
+    bits
+      .toBoolArray()
+      .map((x) => (x ? Number(1) : Number(0)))
+      .reduce((x, y) => x + y)
+  );
 }
