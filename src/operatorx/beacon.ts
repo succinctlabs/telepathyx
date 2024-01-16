@@ -52,11 +52,16 @@ export class BeaconClient {
     return header;
   }
 
-  async getBlock(blockIdentifier: BeaconId): Promise<capella.BeaconBlock> {
+  async getBlock(
+    blockIdentifier: BeaconId
+  ): Promise<capella.BeaconBlock | null> {
     const id = this.toStringFromBeaconId(blockIdentifier);
     const response = await this.client.get(
       "/eth/v2/beacon/blocks/{block_id}".replace("{block_id}", id)
     );
+    if (response.status === 404 || response.data.code === 404) {
+      return null;
+    }
     try {
       return ssz.capella.BeaconBlock.fromJson(
         response.data.data.message
@@ -88,6 +93,9 @@ export class BeaconClient {
     attestedIdentifier: number
   ): Promise<Pick<StepUpdate, "finalizedBlock" | "finalityBranch">> {
     const attestedBlock = await this.getBlock(attestedIdentifier);
+    if (attestedBlock === null) {
+      throw new Error("Attested slot is skipped");
+    }
     const attestedState = await this.getState(attestedBlock.slot);
     const attestedStateView = ssz.capella.BeaconState.toView(
       attestedState as any
@@ -96,6 +104,9 @@ export class BeaconClient {
     const finalizedBlock = await this.getBlock(
       attestedState.finalizedCheckpoint.root
     );
+    if (finalizedBlock === null) {
+      throw new Error("Finalized slot is skipped");
+    }
     const finalityBranchIndex = ssz.capella.BeaconState.getPathInfo([
       "finalized_checkpoint",
       "root",
@@ -112,8 +123,14 @@ export class BeaconClient {
 
   async getStepUpdate(attestedIdentifier: BeaconId): Promise<StepUpdate> {
     const attestedBlock = await this.getBlock(attestedIdentifier);
+    if (attestedBlock === null) {
+      throw new Error("Attested slot is skipped");
+    }
     const signedSlot = attestedBlock.slot + 1;
     const signedBlock = await this.getBlock(signedSlot);
+    if (signedBlock === null) {
+      throw new Error("Signed slot is skipped");
+    }
 
     const { finalizedBlock, finalityBranch } = await this.getAttestedStepUpdate(
       attestedBlock.slot
@@ -161,6 +178,9 @@ export class BeaconClient {
 
   async getRotateUpdate(blockIdentifier: BeaconId): Promise<RotateUpdate> {
     const finalizedBlock = await this.getBlock(blockIdentifier);
+    if (finalizedBlock === null) {
+      throw new Error("Finalized slot is skipped");
+    }
     const finalizedState = await this.getState(finalizedBlock.slot);
     const finalizedStateView = ssz.capella.BeaconState.toView(
       finalizedState as any

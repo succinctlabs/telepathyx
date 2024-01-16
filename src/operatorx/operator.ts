@@ -370,7 +370,7 @@ export class Operator {
           continue;
         }
         console.error(
-          "Error getting step update for slot:",
+          "Failed to get step update for slot:",
           headSlot - BigInt(i),
           err
         );
