@@ -9,3 +9,11 @@ cd contracts
 cp .env.example .env
 forge script DeployLightClient --ffi --private-key $PRIVATE_KEY --rpc-url $RPC --broadcast --etherscan-api-key $ETHERSCAN_API_KEY --verify
 ```
+
+## Run operator
+
+```bash
+cp .env.example .env
+yarn
+yarn build && yarn start run <configName>
+```
