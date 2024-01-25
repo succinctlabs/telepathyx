@@ -29,7 +29,7 @@ function getExecutionStateRootDepth() {
 }
 
 function getExecutionStateRootIndex() {
-    return 402;
+    return 802;
 }
 
 function getSyncCommitteeDepth() {
