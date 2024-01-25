@@ -25,7 +25,7 @@ function getFinalizedHeaderIndex() {
 }
 
 function getExecutionStateRootDepth() {
-    return 8;
+    return 9;
 }
 
 function getExecutionStateRootIndex() {
