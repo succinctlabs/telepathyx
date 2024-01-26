@@ -10,12 +10,12 @@ class StepCircuit extends Circuit {
 
   async generateProofData(inputBytes: Buffer): Promise<ProofData> {
     const inputByteString = inputBytes.toString("hex");
-    const CONSENSUS_RPC_1 = process.env.CONSENSUS_RPC_1;
+    const CONSENSUS_RPC = process.env.CONSENSUS_RPC;
 
     let res;
     try {
       res = await axios.get(
-        `${CONSENSUS_RPC_1}/api/beacon/proof/lightclient/step/${inputByteString}`
+        `${CONSENSUS_RPC}/api/beacon/proof/lightclient/step/${inputByteString}`
       );
     } catch (e) {
       console.error("Failed to get witness JSON from beaconapi", e);
