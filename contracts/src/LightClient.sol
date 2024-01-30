@@ -15,12 +15,6 @@ contract LightClient {
     bytes32 public immutable ROTATE_FUNCTION_ID;
     address public immutable FUNCTION_GATEWAY_ADDRESS;
 
-    uint256 internal constant MIN_SYNC_COMMITTEE_PARTICIPANTS = 10;
-    uint256 internal constant SYNC_COMMITTEE_SIZE = 512;
-    uint256 internal constant FINALIZED_ROOT_INDEX = 105;
-    uint256 internal constant NEXT_SYNC_COMMITTEE_INDEX = 55;
-    uint256 internal constant EXECUTION_STATE_ROOT_INDEX = 402;
-
     /// @notice The latest slot the light client has a finalized header for.
     uint256 public head = 0;
 
@@ -75,10 +69,13 @@ contract LightClient {
 
     /// @notice Through the FunctionGateway, request for a step proof to be generated with the given attested slot number as the input.
     function requestStep(uint256 attestedSlot) external payable {
-        IFunctionGateway(FUNCTION_GATEWAY_ADDRESS).requestCall{value: msg.value}(
+        IFunctionGateway(FUNCTION_GATEWAY_ADDRESS).requestCall{
+            value: msg.value
+        }(
             STEP_FUNCTION_ID,
             abi.encodePacked(
-                syncCommitteePoseidons[getSyncCommitteePeriod(attestedSlot)], uint64(attestedSlot)
+                syncCommitteePoseidons[getSyncCommitteePeriod(attestedSlot)],
+                uint64(attestedSlot)
             ),
             address(this),
             abi.encodeWithSelector(this.step.selector, attestedSlot),
@@ -88,7 +85,9 @@ contract LightClient {
 
     /// @notice Through the FunctionGateway, request for a rotate proof to be generated with the given finalized slot number as the input.
     function requestRotate(uint256 finalizedSlot) external payable {
-        IFunctionGateway(FUNCTION_GATEWAY_ADDRESS).requestCall{value: msg.value}(
+        IFunctionGateway(FUNCTION_GATEWAY_ADDRESS).requestCall{
+            value: msg.value
+        }(
             ROTATE_FUNCTION_ID,
             abi.encodePacked(headers[finalizedSlot]),
             address(this),
@@ -107,11 +106,17 @@ contract LightClient {
 
         // Input: [uint256 syncCommitteePoseidon, uint64 attestedSlot]
         // Output: [bytes32 finalizedHeaderRoot, bytes32 executionStateRoot, uint64 finalizedSlot, uint16 participation]
-        bytes memory output = IFunctionGateway(FUNCTION_GATEWAY_ADDRESS).verifiedCall(
-            STEP_FUNCTION_ID, abi.encodePacked(syncCommitteePoseidon, uint64(attestedSlot))
+        bytes memory output = IFunctionGateway(FUNCTION_GATEWAY_ADDRESS)
+            .verifiedCall(
+                STEP_FUNCTION_ID,
+                abi.encodePacked(syncCommitteePoseidon, uint64(attestedSlot))
+            );
+        bytes32 finalizedHeaderRoot = bytes32(
+            OutputReader.readUint256(output, 0)
         );
-        bytes32 finalizedHeaderRoot = bytes32(OutputReader.readUint256(output, 0));
-        bytes32 executionStateRoot = bytes32(OutputReader.readUint256(output, 32));
+        bytes32 executionStateRoot = bytes32(
+            OutputReader.readUint256(output, 32)
+        );
         uint64 finalizedSlot = OutputReader.readUint64(output, 64);
         uint16 participation = OutputReader.readUint16(output, 72);
 
@@ -123,7 +128,11 @@ contract LightClient {
             revert SlotBehindHead(finalizedSlot);
         }
 
-        setSlotRoots(uint256(finalizedSlot), finalizedHeaderRoot, executionStateRoot);
+        setSlotRoots(
+            uint256(finalizedSlot),
+            finalizedHeaderRoot,
+            executionStateRoot
+        );
     }
 
     /// @notice Process a rotate proof that has been verified in the FunctionGateway, then store the next sync committee poseidon.
@@ -135,10 +144,14 @@ contract LightClient {
 
         // Input: [bytes32 finalizedHeaderRoot]
         // Output: [bytes32 syncCommitteePoseidon]
-        bytes memory output = IFunctionGateway(FUNCTION_GATEWAY_ADDRESS).verifiedCall(
-            ROTATE_FUNCTION_ID, abi.encodePacked(finalizedHeaderRoot)
+        bytes memory output = IFunctionGateway(FUNCTION_GATEWAY_ADDRESS)
+            .verifiedCall(
+                ROTATE_FUNCTION_ID,
+                abi.encodePacked(finalizedHeaderRoot)
+            );
+        bytes32 syncCommitteePoseidon = bytes32(
+            OutputReader.readUint256(output, 0)
         );
-        bytes32 syncCommitteePoseidon = bytes32(OutputReader.readUint256(output, 0));
 
         uint256 period = getSyncCommitteePeriod(finalizedSlot);
         uint256 nextPeriod = period + 1;
@@ -146,7 +159,9 @@ contract LightClient {
     }
 
     /// @notice Gets the sync committee period from a slot.
-    function getSyncCommitteePeriod(uint256 slot) internal view returns (uint256) {
+    function getSyncCommitteePeriod(
+        uint256 slot
+    ) internal view returns (uint256) {
         return slot / SLOTS_PER_PERIOD;
     }
 
@@ -159,9 +174,11 @@ contract LightClient {
     /// @dev Checks if roots exists for the slot already. If there is, check for a conflict between
     ///      the given roots and the existing roots. If there is an existing header but no
     ///      conflict, do nothing. This avoids timestamp renewal DoS attacks.
-    function setSlotRoots(uint256 slot, bytes32 finalizedHeaderRoot, bytes32 executionStateRoot)
-        internal
-    {
+    function setSlotRoots(
+        uint256 slot,
+        bytes32 finalizedHeaderRoot,
+        bytes32 executionStateRoot
+    ) internal {
         if (headers[slot] != bytes32(0)) {
             revert HeaderRootAlreadySet(slot);
         }
@@ -176,7 +193,10 @@ contract LightClient {
     }
 
     /// @notice Sets the sync committee poseidon for a given period.
-    function setSyncCommitteePoseidon(uint256 period, bytes32 poseidon) internal {
+    function setSyncCommitteePoseidon(
+        uint256 period,
+        bytes32 poseidon
+    ) internal {
         if (syncCommitteePoseidons[period] != bytes32(0)) {
             revert SyncCommitteeAlreadySet(period);
         }
