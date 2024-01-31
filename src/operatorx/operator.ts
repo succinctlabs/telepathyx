@@ -76,8 +76,7 @@ export class Operator {
         break;
       case 17000:
         rpc = process.env.CONSENSUS_RPC_17000 || "";
-        // TODO: Update to Deneb on Feb 7
-        beaconClient = new CapellaClient(rpc, ChainId.Holesky);
+        beaconClient = new DenebClient(rpc, ChainId.Holesky);
         break;
       case 11155111:
         rpc = process.env.CONSENSUS_RPC_11155111 || "";
