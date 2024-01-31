@@ -1,4 +1,4 @@
-import { BeaconClient, computeBitSum } from "./beacon.js";
+import { computeBitSum } from "./phase0.js";
 import axios from "axios";
 import {
   PublicClient,
@@ -11,8 +11,10 @@ import {
 } from "viem";
 import { goerli } from "viem/chains";
 import { TELEPATHY_ABI } from "./abi.js";
-import { Config } from "./config.js";
+import { ChainId, OperatorConfig } from "./config.js";
 import fetch from "node-fetch";
+import { CapellaClient } from "./capella.js";
+import { DenebClient } from "./deneb.js";
 
 const SLOTS_PER_PERIOD = 8192n;
 export function getSyncCommitteePeriod(slot: bigint): bigint {
@@ -22,7 +24,7 @@ export function getSyncCommitteePeriod(slot: bigint): bigint {
 // A type that holds all the clients and config information needed for the request.
 type ParentClient = {
   viem: PublicClient;
-  beacon: BeaconClient;
+  beaconConsensusClient: CapellaClient | DenebClient;
 };
 
 function getPlatformUrl() {
@@ -32,14 +34,14 @@ function getPlatformUrl() {
 const zero_bytes32_str = fromBytes(toBytes(0, { size: 32 }), "hex");
 
 export class Operator {
-  config: Config;
+  config: OperatorConfig;
   client: ParentClient;
 
   stopped = false;
   lastRotatePeriod: number | null = null;
   lastStepEpoch: number | null = null;
 
-  constructor(config: Config) {
+  constructor(config: OperatorConfig) {
     this.config = config;
     console.log("Using config:", config);
 
@@ -56,24 +58,38 @@ export class Operator {
       }),
     });
     let rpc = "";
+    let beaconClient;
     switch (config.consensusChainId) {
       case 1:
         rpc = process.env.CONSENSUS_RPC_1 || "";
+        // TODO: Update to Deneb on ...
+        beaconClient = new CapellaClient(rpc, ChainId.Mainnet);
         break;
       case 5:
         rpc = process.env.CONSENSUS_RPC_5 || "";
+        beaconClient = new DenebClient(rpc, ChainId.Goerli);
+        break;
+      case 100:
+        rpc = process.env.CONSENSUS_RPC_100 || "";
+        // TODO: Update to Deneb on ...
+        beaconClient = new CapellaClient(rpc, ChainId.Gnosis);
+        break;
+      case 17000:
+        rpc = process.env.CONSENSUS_RPC_17000 || "";
+        // TODO: Update to Deneb on Feb 7
+        beaconClient = new CapellaClient(rpc, ChainId.Holesky);
         break;
       case 11155111:
         rpc = process.env.CONSENSUS_RPC_11155111 || "";
+        beaconClient = new DenebClient(rpc, ChainId.Sepolia);
         break;
       default:
         throw new Error("Invalid consensus chain id");
     }
-    const beaconClient = new BeaconClient(rpc);
 
     this.client = {
       viem: viemClient,
-      beacon: beaconClient,
+      beaconConsensusClient: beaconClient,
     };
   }
 
@@ -128,7 +144,7 @@ export class Operator {
         console.log(
           "Head slot is 0, meaning the light client was likely just deployed."
         );
-        const currentBeaconHeader = await this.client.beacon.getHeader("head");
+        const currentBeaconHeader = await this.client.beaconConsensusClient.getHeader("head");
         let currentSlot = BigInt(currentBeaconHeader.slot);
         let currentPeriod = getSyncCommitteePeriod(currentSlot);
         // Loop until we find a sync committee poseidon that is not 0.
@@ -187,7 +203,7 @@ export class Operator {
             return;
           }
           // We get the rotate update to make sure there are no issues with the provided headSlot
-          await this.client.beacon.getRotateUpdate(headSlot);
+          await this.client.beaconConsensusClient.getRotateUpdate(headSlot);
           await this.requestRotate(headSlot);
           return;
         } catch (err) {
@@ -199,7 +215,7 @@ export class Operator {
         console.log("Rotate not needed.");
       }
 
-      const currentBeaconHeader = await this.client.beacon.getHeader("head");
+      const currentBeaconHeader = await this.client.beaconConsensusClient.getHeader("head");
       let currentSlot = BigInt(currentBeaconHeader.slot);
       console.log("Current slot: " + currentSlot);
       // This is the maximum step slot we can request
@@ -353,7 +369,7 @@ export class Operator {
     for (let i = 1; i <= 100; i++) {
       try {
         // Try to get the step update for the current head - i
-        const data = await this.client.beacon.getStepUpdate(
+        const data = await this.client.beaconConsensusClient.getStepUpdate(
           headSlot - BigInt(i)
         );
         if (
