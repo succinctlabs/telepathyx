@@ -38,12 +38,11 @@ export const ALL_CONFIGS: Record<string, OperatorConfig> = {
     intervalMs: 1000 * 1800, // 150 slots = 12*150
   },
   sepolia: {
-    address: "0x26c5bE2e002b7A9703F4e66B92F9D380a1Dd13bc",
+    address: "0xb57Deca4a029b524C6F4726430417f585624945b",
     chainId: 11155111,
     consensusChainId: 11155111,
-    // TODO: Update these function IDs with Sepolia-Deneb
     stepFunctionId:
-      "0xd7f33a3358d67df3bf792e8b2ab0188d16f4fc07418b35d950407af0d3cb33e0",
+      "0x55b63fe87aef4a2d5e6a141455c12964f2b5611a45a30104fc78cbda308c0ee3",
     rotateFunctionId:
       "0xa511bd86a30fa6db581480ac7591d4271c845411ac4e1ad93797d09a57b60522",
     finalityThreshold: 342,

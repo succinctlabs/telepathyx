@@ -13,6 +13,8 @@ forge script DeployLightClient --ffi --private-key $PRIVATE_KEY --rpc-url $RPC -
 ## Run operator
 
 ```bash
+nvm use 18.17.0
+
 cp .env.example .env
 yarn
 yarn build && yarn start run <configName>

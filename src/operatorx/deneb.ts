@@ -139,7 +139,6 @@ export class DenebClient extends Phase0Client {
             gindex: BigInt(executionStateRootIndex)
         }) as SingleProof;
 
-        console.log('Deneb Execution State Root Proof Length: ' + proof.witnesses.length);
         return { root: proof.leaf, branch: proof.witnesses };
     }
 }
