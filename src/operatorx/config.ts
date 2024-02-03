@@ -1,6 +1,7 @@
+import { BitArray } from "@chainsafe/ssz";
 import { Hex } from "viem";
 
-export type Config = {
+export type OperatorConfig = {
   address: Hex;
   chainId: number;
   consensusChainId: number;
@@ -11,7 +12,7 @@ export type Config = {
   intervalMs: number;
 };
 
-export const ALL_CONFIGS: Record<string, Config> = {
+export const ALL_CONFIGS: Record<string, OperatorConfig> = {
   gnosis: {
     address: "0x186731E7997e2190dcADC1BBEf62e042622AB7de",
     chainId: 100,
@@ -37,11 +38,11 @@ export const ALL_CONFIGS: Record<string, Config> = {
     intervalMs: 1000 * 1800, // 150 slots = 12*150
   },
   sepolia: {
-    address: "0x26c5bE2e002b7A9703F4e66B92F9D380a1Dd13bc",
+    address: "0xb57Deca4a029b524C6F4726430417f585624945b",
     chainId: 11155111,
     consensusChainId: 11155111,
     stepFunctionId:
-      "0xd7f33a3358d67df3bf792e8b2ab0188d16f4fc07418b35d950407af0d3cb33e0",
+      "0x55b63fe87aef4a2d5e6a141455c12964f2b5611a45a30104fc78cbda308c0ee3",
     rotateFunctionId:
       "0xa511bd86a30fa6db581480ac7591d4271c845411ac4e1ad93797d09a57b60522",
     finalityThreshold: 342,
@@ -49,3 +50,90 @@ export const ALL_CONFIGS: Record<string, Config> = {
     intervalMs: 1000 * 240,
   },
 };
+
+export enum ChainId {
+  Mainnet = 1,
+  Goerli = 5,
+  Sepolia = 11155111,
+  Holesky = 17000,
+  Gnosis = 100,
+}
+
+const config = {} as Record<
+  ChainId,
+  {
+    secondsPerSlot: number;
+    slotsPerEpoch: number;
+    epochsPerPeriod: number;
+    capellaForkEpoch: number;
+    denebForkEpoch: number;
+  }
+>;
+
+config[ChainId.Mainnet] = {
+  secondsPerSlot: 12,
+  slotsPerEpoch: 32,
+  epochsPerPeriod: 256,
+  capellaForkEpoch: 194048,
+  // TODO: UPDATE THIS TO THE REAL FORK EPOCH FOR MAINNET
+  denebForkEpoch: 500000
+};
+
+config[ChainId.Goerli] = {
+  secondsPerSlot: 12,
+  slotsPerEpoch: 32,
+  epochsPerPeriod: 256,
+  capellaForkEpoch: 162304,
+  denebForkEpoch: 231680
+};
+
+config[ChainId.Sepolia] = {
+  secondsPerSlot: 12,
+  slotsPerEpoch: 32,
+  epochsPerPeriod: 256,
+  capellaForkEpoch: 56832,
+  denebForkEpoch: 132608
+};
+
+config[ChainId.Holesky] = {
+  secondsPerSlot: 12,
+  slotsPerEpoch: 32,
+  epochsPerPeriod: 256,
+  capellaForkEpoch: 256,
+  denebForkEpoch: 29696
+};
+
+config[ChainId.Gnosis] = {
+  secondsPerSlot: 5,
+  slotsPerEpoch: 16,
+  epochsPerPeriod: 512,
+  capellaForkEpoch: 648704,
+  // TODO: UPDATE THIS TO THE REAL FORK EPOCH FOR MAINNET
+  denebForkEpoch: 1839314
+};
+
+export class BeaconChainConfig {
+  static secondsPerSlot(chainId: ChainId): number {
+    return config[chainId].secondsPerSlot;
+  }
+
+  static slotsPerEpoch(chainId: ChainId): number {
+    return config[chainId].slotsPerEpoch;
+  }
+
+  static epochsPerPeriod(chainId: ChainId): number {
+    return config[chainId].epochsPerPeriod;
+  }
+
+  static capellaForkEpoch(chainId: ChainId): number {
+    return config[chainId].capellaForkEpoch;
+  }
+
+  static capellaForkSlot(chainId: ChainId): number {
+    return config[chainId].capellaForkEpoch * config[chainId].slotsPerEpoch;
+  }
+
+  static denebForkSlot(chainId: ChainId): number {
+    return config[chainId].denebForkEpoch * config[chainId].slotsPerEpoch;
+}
+}

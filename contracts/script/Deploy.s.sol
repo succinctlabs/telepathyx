@@ -13,11 +13,14 @@ contract DeployLightClient is Script {
     function run() public {
         string memory rawJson;
         {
-            string memory CONSENSUS_RPC_1 = vm.envString("CONSENSUS_RPC_1");
+            string memory CONSENSUS_RPC = vm.envString("CONSENSUS_RPC");
             string[] memory curlInputs = new string[](5);
             curlInputs[0] = "curl";
             curlInputs[1] = string(
-                abi.encodePacked(CONSENSUS_RPC_1, "/api/beacon/proof/lightclient/init/finalized")
+                abi.encodePacked(
+                    CONSENSUS_RPC,
+                    "/api/beacon/proof/lightclient/init/finalized"
+                )
             );
             curlInputs[2] = "-o";
             curlInputs[3] = "init.json";
@@ -28,13 +31,17 @@ contract DeployLightClient is Script {
             rawJson = vm.readFile("init.json");
         }
 
-        bytes32 genesisValidatorsRoot = rawJson.readBytes32(".genesisValidatorsRoot");
+        bytes32 genesisValidatorsRoot = rawJson.readBytes32(
+            ".genesisValidatorsRoot"
+        );
         uint256 genesisTime = rawJson.readUint(".genesisTime");
         uint256 secondsPerSlot = rawJson.readUint(".secondsPerSlot");
         uint256 slotsPerPeriod = rawJson.readUint(".slotsPerPeriod");
         uint32 sourceChainId = uint32(rawJson.readUint(".sourceChainId"));
         uint256 syncCommitteePeriod = rawJson.readUint(".syncCommitteePeriod");
-        bytes32 syncCommitteePoseidon = rawJson.readBytes32(".syncCommitteePoseidon");
+        bytes32 syncCommitteePoseidon = rawJson.readBytes32(
+            ".syncCommitteePoseidon"
+        );
 
         console.log("genesisValidatorsRoot:");
         console.logBytes32(bytes32(genesisValidatorsRoot));
@@ -55,7 +62,10 @@ contract DeployLightClient is Script {
         console.logBytes32(bytes32(STEP_FUNCTION_ID));
         console.log("rotateFunctionId:");
         console.logBytes32(bytes32(ROTATE_FUNCTION_ID));
-        console.log("functionGatewayAddress: %s", address(FUNCTION_GATEWAY_ADDRESS));
+        console.log(
+            "functionGatewayAddress: %s",
+            address(FUNCTION_GATEWAY_ADDRESS)
+        );
         vm.startBroadcast();
         LightClient lightClient = new LightClient(
             genesisValidatorsRoot,

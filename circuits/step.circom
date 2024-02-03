@@ -5,7 +5,7 @@
   |_|   \___| |_| \___| | .__/ \__,_|  \__| |_||_|  \_, |
                         |_|                         |__/ 
 
-Created on March 6th 2023 by Succinct Labs
+Created on Jan 25th 2024 by Succinct Labs (Deneb Upgrade)
 Code: https://github.com/succinctlabs/telepathy-circuits
 License: GPL-3
 */

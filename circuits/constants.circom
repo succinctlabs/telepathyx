@@ -25,11 +25,11 @@ function getFinalizedHeaderIndex() {
 }
 
 function getExecutionStateRootDepth() {
-    return 8;
+    return 9;
 }
 
 function getExecutionStateRootIndex() {
-    return 402;
+    return 802;
 }
 
 function getSyncCommitteeDepth() {
