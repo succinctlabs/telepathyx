@@ -3,7 +3,8 @@ cache/
 out/
 
 # Ignores development broadcast logs
-!/broadcast
+*/broadcast
+/broadcast/*/100/
 /broadcast/*/11155111/
 /broadcast/*/31337/
 /broadcast/*/5/
