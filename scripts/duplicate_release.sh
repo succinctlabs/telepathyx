@@ -1,4 +1,4 @@
-# For CircomX, easily duplicate a release. This is useful for TelepathyX when we don't want to re-build/re-copy from scratch.
+# For CircomX, easily duplicate a release. This is useful for TelepathyX when we don't want to re-build/re-copy from scratch when deploying for a new source chain.
 # TODO: Add logic to update the DB
 
 set -e
